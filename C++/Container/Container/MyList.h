@@ -35,18 +35,18 @@ public:
 		{
 			iterator result;
 			result = *this;
-			_ptr->next;
+			_ptr = _ptr->next;
 
 			return result;
 		}
 		iterator& operator++()
 		{
-			_ptr->next;
+			_ptr = _ptr->next;
 			return *this;
 		}
 		T& operator*()
 		{
-			return *_ptr;
+			return _ptr->data;
 		}
 
 	private:
@@ -143,6 +143,9 @@ public:
 
 		return now->data;
 	}
+
+	iterator begin() { return iterator(_head->next); }
+	iterator end() { return iterator(_head); }
 
 private:
 	unsigned int _size = 0;
