@@ -15,17 +15,43 @@ template<typename T>
 class List
 {
 public:
-	//class iteartor
-	//{
-	//	iterator() { _ptr = nullptr; }
-	//	iterator(Node<T>* ptr) : _ptr(ptr) {}
-	//	~iterator() { }
+	class iterator
+	{
+	public:
+		iterator() { _ptr = nullptr; }
+		iterator(Node<T>* ptr) : _ptr(ptr) {}
+		~iterator() { }
 
-	//	// °úÁ¦
+		bool operator==(const iterator& other)
+		{
+			return _ptr == other._ptr;
+		}
+		bool operator!=(const iterator& other)
+		{
+			return _ptr != other._ptr;
+		}
 
-	//private:
-	//	Node<T>* _ptr;
-	//};
+		iterator operator++(int)
+		{
+			iterator result;
+			result = *this;
+			_ptr->next;
+
+			return result;
+		}
+		iterator& operator++()
+		{
+			_ptr->next;
+			return *this;
+		}
+		T& operator*()
+		{
+			return *_ptr;
+		}
+
+	private:
+		Node<T>* _ptr;
+	};
 
 	List()
 	{
