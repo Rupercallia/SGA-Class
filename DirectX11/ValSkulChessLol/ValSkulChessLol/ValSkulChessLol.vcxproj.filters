@@ -52,6 +52,8 @@
     <ClInclude Include="Scene\ColliderScene.h" />
     <ClInclude Include="Scene\DungreedScene.h" />
     <ClInclude Include="Objects\Arrow\Player.h" />
+    <ClInclude Include="Objects\Arrow\Bible.h" />
+    <ClInclude Include="Objects\Arrow\Monster.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ValSkulChessLol.cpp">
@@ -136,6 +138,12 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Objects\Arrow\Player.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\Arrow\Bible.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\Arrow\Monster.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

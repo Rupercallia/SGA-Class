@@ -2,10 +2,7 @@
 #include "ArrowScene.h"
 
 #include "Objects/Arrow/Arrow.h"
-#include "DungreedScene.h"
 #include "Objects/Arrow/Player.h"
-
-
 
 ArrowScene::ArrowScene()
 {
@@ -17,8 +14,9 @@ ArrowScene::ArrowScene()
 		shared_ptr<Arrow> arrow = make_shared<Arrow>();
 		_arrows.push_back(arrow);
 	}
+
 	_bow->GetTransform()->SetPos({ 150,CENTER.y });
-	_bow->GetTransform()->SetScale({ 0.5f, 0.5f });
+	_bow->GetTransform()->SetScale({ 0.8f, 0.8f });
 	_muzzle->SetParent(_bow->GetTransform());
 	_muzzle->SetPos(Vector(100, 0));
 
