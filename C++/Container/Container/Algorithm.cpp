@@ -11,6 +11,13 @@ bool FindFunc(int value)
 	return false;
 }
 
+class Player
+{
+public:
+	int _hp;
+	int _atk;
+};
+
 int main()
 {
 	vector<int> v;
@@ -64,36 +71,26 @@ int main()
 
 	// 3. 모든 수가 50보다 작은지 bool으로 알려주세요. (iter, algorithm)
 
-	bool all_less_than_50 = true;
-
-	for (iter = v.begin(); iter != v.end(); iter++)
+	struct FindFunctor
 	{
-		if (*iter >= 50)
+		bool operator()(int value)
 		{
-			all_less_than_50 = false;
-			break;
+			if (value < compareNum)
+				return true;
+			return false;
 		}
-			
-	}
+		int compareNum = 0;
 
-	if (all_less_than_50)
-	{
-		cout << "모든 수 가 50보다 작습니다." << endl;
-	}
-	else
-	{
-		cout << "50보다 크거나 작은 수가 있습니다." << endl;
-	}
+	};
 
-	bool all_less_than_50_2 = std::all_of(v.begin(), v.end(), [](int i) { return i < 50; });
-	if (all_less_than_50_2)
-	{
-		cout << "모든 수 가 50보다 작습니다." << endl;
-	}
-	else
-	{
-		cout << "50보다 크거나 작은 수가 있습니다." << endl;
-	}
+	FindFunctor functor2;
+	functor2.compareNum = 50;
+	iter = std::find_if(v.begin(), v.end(), functor2); // 함수객체, 혹은 함수포인터 ... Callable 객체
+	if (iter != v.end())
+		cout << *iter << endl;
+
+
+
 	// 4. 하나라도 30보다 큰 수가 있는지 bool으로 알려주세요. (iter, algorithm)
 
 	bool any_bigger_than_30 = true;
@@ -138,5 +135,64 @@ int main()
 	// 9. 원소가 11인 원소를 지워주세요. iter, algorithm
 	remove(v.begin(), v.end(), 11);
 	// 10. 원소가 10보다 작은 원소들을 지워주세요. algorithm
-	remove_if(v.begin(), v.end(), [](int i) { return i < 10; });
+	struct RemoveF
+	{
+		bool operator()(const int& value)
+		{
+			if (value < num)
+				return true;
+			return false;
+		}
+
+		int num;
+	};
+
+	RemoveF removeF;
+	removeF.num = 10;
+	v.erase(std::remove_if(v.begin(), v.end(), removeF), v.end());
+
+	iter = v.begin();
+
+	for (iter; iter != v.end(); )
+	{
+		if (*iter < 50)
+		{
+			iter = v.erase(iter);
+			continue;
+		}
+
+		iter++;
+	}
+
+	v.push_back(3);
+	v.push_back(5);
+	v.push_back(1);
+	v.push_back(10);
+	v.push_back(50);
+
+	struct Comparer
+	{
+		bool operator()(int a, int b)
+		{
+			if (a > b)
+				return true;
+			return false;
+		}
+	};
+
+	Comparer comparer;
+
+	std::sort(v.begin(), v.end(), greater<int>());
+
+	vector<Player> players;
+
+	players.push_back({ 100,10 });
+	players.push_back({ 50,3 });
+	players.push_back({ 1000,1 });
+	players.push_back({ 30,30 });
+	players.push_back({ 70,7 });
+
+
+
+	return 0;
 }

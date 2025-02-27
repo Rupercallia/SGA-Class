@@ -20,9 +20,5 @@ private:
 	shared_ptr<Bible> _bible;
 
 	shared_ptr<class Player> _player;
-	shared_ptr<class Monster> _monster;
-	shared_ptr<class ArrowScene> _bow;
-	shared_ptr<class ArrowScene> _muzzle;
-
 };
 

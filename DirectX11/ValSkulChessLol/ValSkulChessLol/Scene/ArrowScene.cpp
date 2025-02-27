@@ -2,7 +2,6 @@
 #include "ArrowScene.h"
 
 #include "Objects/Arrow/Arrow.h"
-#include "Objects/Arrow/Player.h"
 
 ArrowScene::ArrowScene()
 {
@@ -16,7 +15,7 @@ ArrowScene::ArrowScene()
 	}
 
 	_bow->GetTransform()->SetPos({ 150,CENTER.y });
-	_bow->GetTransform()->SetScale({ 0.8f, 0.8f });
+	_bow->GetTransform()->SetScale({ 0.5f, 0.5f });
 	_muzzle->SetParent(_bow->GetTransform());
 	_muzzle->SetPos(Vector(100, 0));
 
