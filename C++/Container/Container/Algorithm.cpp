@@ -22,7 +22,7 @@ int main()
 {
 	vector<int> v;
 
-	v = { 5, 1, 3, 112, 10, 9, 50, 30 };
+	v = { 5, 1, 3, 112, 10, 9, 50, 30, 3 };
 
 	// 1.  1이 있는지 찾아주세요. 그리고 index나 혹은 iterator자리를 찾아주세요
 	vector<int>::iterator iter;
@@ -131,7 +131,9 @@ int main()
 	for_each(v.begin(), v.end(), [](int i) { i /= 3; });
 		
 	// 8. 중복된 원소들을 '제거'해주세요. algorithm
-	unique(v.begin(), v.end());
+	std::sort(v.begin(), v.end());
+	vector<int>::iterator iter2 = std::unique(v.begin(), v.end());
+	v.erase(iter2, v.end());
 	// 9. 원소가 11인 원소를 지워주세요. iter, algorithm
 	remove(v.begin(), v.end(), 11);
 	// 10. 원소가 10보다 작은 원소들을 지워주세요. algorithm
