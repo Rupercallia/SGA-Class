@@ -28,6 +28,8 @@ int main()
 	{
 		cout << *iter << endl;
 	}
+	
+	auto is_1 = [](int iter) { return iter == 1; };//람다
 
 	// 2.  15보다 큰 수가 있는지 찾아주세요. 그리고 iterator 자리를 찾아주세요.(iter, algorithm)
 	for (iter = v.begin(); iter != v.end(); iter++)
@@ -43,7 +45,10 @@ int main()
 		bool operator()(int value)
 		{
 			if (value > compareNum)
+			{
 				return true;
+			}
+
 			return false;
 		}
 
@@ -55,6 +60,15 @@ int main()
 	iter = std::find_if(v.begin(), v.end(), functor); // 함수객체, 혹은 함수포인터 ... Callable 객체
 	if (iter != v.end())
 		cout << *iter << endl;
+
+	auto FindFunctor = find_if(v.begin(), v.end(), [compareNum = 20](int value) -> bool 
+		
+		{ if(value > compareNum)
+	{
+		return true;
+	}
+
+	return false; });
 
 	// 3. 모든 수가 50보다 작은지 bool으로 알려주세요. (iter, algorithm)
 
@@ -93,6 +107,13 @@ int main()
 	}
 
 
+	auto Under_50 = all_of(v.begin(), v.end(), [Num = 50](int value) -> bool
+		{
+			if (value < Num)
+				return true;
+			return false;
+		});
+
 	// 4. 하나라도 30보다 큰 수가 있는지 bool으로 알려주세요. (iter, algorithm)
 
 	struct Over_30
@@ -120,6 +141,11 @@ int main()
 		}
 	}
 	
+	auto Over_30 = any_of(v.begin(), v.end(), [Num = 30](int value) -> bool 
+		{ if (value > Num)
+			return true;
+		return false;
+	});
 
 	// 5. 원소가 3인 원소들의 개수를 알려주세요. algorithm
 
@@ -149,6 +175,13 @@ int main()
 		}
 	}
 	
+	auto Just_3 = count_if(v.begin(), v.end(), [Num = 3](int value) -> bool {
+		if (value == Num)
+			return true;
+		return false;
+	});
+
+
 
 	// 6. 원소가 5보다 큰 원소들의 개수를 알려주세요. algorithm
 
@@ -177,11 +210,18 @@ int main()
 		}
 	}
 
+	auto Over_5 = count_if(v.begin(), v.end(), [Num = 5](const int value) -> bool 
+		{
+		if (value > Num)
+			return true;
+		return false;
+		});
+
 	// 7. 모든 원소에 3을 곱해주세요. algorithm
 
 	struct Gob3
 	{
-		bool operator()(int &value)
+		bool operator()(int& value)
 		{
 			value *= 3;
 			return true;
@@ -199,6 +239,8 @@ int main()
 			break;
 		}
 	}
+
+	auto Gob3 = for_each(v.begin(), v.end(), [](int& value) -> bool { return value *= 3; });//람다
 
 	//다시 나누기
 
@@ -222,6 +264,8 @@ int main()
 			break;
 		}
 	}
+
+	auto Nanu3 = for_each(v.begin(), v.end(), []( int& value) -> bool { return value /= 3; });//람다
 
 	// 8. 중복된 원소들을 '제거'해주세요. algorithm
 
@@ -260,6 +304,8 @@ int main()
 		iter++;
 	}
 
+	auto Erase_11 = v.erase(remove_if(v.begin(), v.end(), [Num = 11](const int& value) -> bool { return value == Num; }), v.end());//람다
+
 	// 10. 원소가 10보다 작은 원소들을 지워주세요. algorithm
 	struct RemoveF
 	{
@@ -291,7 +337,11 @@ int main()
 		iter++;
 	}
 
-  
+	auto RemoveF = v.erase(std::remove_if(v.begin(), v.end(), [num = 10](const int& value) -> bool {
+		if (value < num)
+			return true;
+		return false;
+		}), v.end()); //람다
 
     return 0;
 }
