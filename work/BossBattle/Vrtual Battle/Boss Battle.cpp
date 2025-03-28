@@ -5,16 +5,16 @@ void Battle(vector<Player*>& players, Creature* g)
 	cout << "-------------------------------------------------------------" << endl;
 	cout << "고블린 킹과 전투를 시작합니다." << endl;
 
-	map<int, Player*, greater<int>> damageMap;
-
     while (g->IsAlive()) 
     {
+        vector<pair<int, Player*>> damageList;
+        
         for (auto player : players) 
         {
             if (player->IsAlive()) 
             {
                 int damage = player->Attack(g);
-                damageMap[damage] = player;
+                damageList.emplace_back(damage, player);
             }
         }
 
@@ -28,13 +28,15 @@ void Battle(vector<Player*>& players, Creature* g)
         cout << "-------------------------------------------------------------" << endl;
         cout << "고블린 킹이 가장 위협적인 4명을 공격합니다!" << endl;
 
+        sort(damageList.begin(), damageList.end(), greater());
+
         int count = 0;
-        for (auto& player : damageMap) 
+        for (auto& [damage, player] : damageList)
         {
             if (count >= 4) break;
-            if (player.second->IsAlive()) 
+            if (player->IsAlive())
             {
-                g->Attack(player.second);
+                g->Attack(player);
                 count++;
             }
         }
