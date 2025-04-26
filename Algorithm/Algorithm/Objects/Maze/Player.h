@@ -20,9 +20,9 @@ public:
 
 	void Update();
 
-	void FindPath_BFS();
-
 	void FindPath_RightHand();
+	void BFS();
+	void Dijkstra();
 
 	bool Cango(Vector pos);
 private:
@@ -33,7 +33,7 @@ private:
 	int _pathIndex = 0;
 	float _time = 0.0f;
 
-	vector<vector<int>> _discovered;
+	vector<vector<bool>> _discovered;
 	vector<vector<Vector>> _parent;
 };
 

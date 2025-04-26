@@ -1,6 +1,5 @@
 #include "framework.h"
 #include "Player.h"
-
 #include "Objects/Maze/Block.h"
 #include "Objects/Maze/Maze.h"
 
@@ -8,7 +7,7 @@ Player::Player(shared_ptr<Maze> maze)
 : _maze(maze)
 {
 	_maze.lock()->SetBlockType(_pos, Block::BlockType::PLAYER);
-	FindPath_BFS();
+	BFS();
 }
 
 Player::~Player()
@@ -32,70 +31,6 @@ void Player::Update()
 			_maze.lock()->SetBlockType(_pos, Block::PLAYER);
 		}
 		_pathIndex++;
-	}
-}
-
-void Player::FindPath_BFS()
-{
-	auto maze = _maze.lock();
-
-	if (!maze)
-		return;
-
-	Vector start = { 1,1 };
-	Vector end = maze->EndPos();
-
-	_discovered = vector<vector<int>>(MAX_Y, vector<int>(MAX_X, false));
-	_parent = vector<vector<Vector>>(MAX_Y, vector<Vector>(MAX_X, { -1, -1 }));
-
-	queue<Vector> q;
-	q.push(start);
-	_discovered[start.y][start.x] = true;
-	_parent[start.y][start.x] = start;
-
-	Vector frontPos[4] =
-	{
-		Vector(0,-1), // UP
-		Vector(1,0), // RIGHT
-		Vector(0,1), // DOWN
-		Vector(-1,0) // LEFT
-	};
-
-	while (!q.empty())
-	{
-		if (q.empty())
-			break;
-
-		Vector path = q.front();
-		q.pop();
-
-		if (path == end)
-			break;
-
-		for (auto& dir : frontPos)
-		{
-			Vector next = path + dir;
-
-			// 이동 가능한지 & 방문 여부 확인
-			if (!_discovered[next.y][next.x] && Cango(next))
-			{
-				q.push(next);
-				_discovered[next.y][next.x] = true;
-				_parent[next.y][next.x] = path;
-				maze->SetBlockType(next, Block::BlockType::FOOTPRINT);
-			}
-		
-			// 경로 추적
-			_path.clear();
-			Vector pos = end;
-			while (!(pos == start) && pos.x != -1 && pos.y != -1)
-			{
-				_path.push_back(pos);
-				pos = _parent[pos.y][pos.x];
-			}
-			_path.push_back(start);
-			reverse(_path.begin(), _path.end());
-		}
 	}
 }
 
@@ -153,9 +88,8 @@ void Player::FindPath_BFS()
 		}
 	}
 
-	_path.push_back(maze->EndPos());*/
-
-	/*stack<Vector> s;
+	_path.push_back(maze->EndPos());
+	stack<Vector> s;
 
 	for (int i = 0; i < _path.size() - 1; i++)
 	{
@@ -177,6 +111,130 @@ void Player::FindPath_BFS()
 
 	std::reverse(_path.begin(), _path.end());
 }*/
+
+/*void Player::BFS()
+{
+	Vector frontPos[4] =
+	{
+		Vector(0,-1), // UP
+		Vector(1,0), // RIGHT
+		Vector(0,1), // DOWN
+		Vector(-1,0) // LEFT
+	};
+
+	_parent.resize(MAX_Y, vector<Vector>(MAX_X, Vector(-1, -1)));
+	_discovered.resize(MAX_Y, vector<bool>(MAX_X, false));
+
+	queue<Vector> q;
+	Vector start = _maze.lock()->StartPos();
+	Vector end = _maze.lock()->EndPos();
+	_parent[start.y][start.x] = start;
+	_discovered[start.y][start.x] = true;
+
+	q.push(start);
+	while (true)
+	{
+		Vector here = q.front();
+		if (here == end)
+			break;
+
+		q.pop();
+
+		for (int i = 0; i < 4; i++)
+		{
+			Vector there = here + frontPos[i];
+
+			if (Cango(there) == false)
+				continue;
+			if (_discovered[there.y][there.x])
+				continue;
+
+			q.push(there);
+			_parent[there.y][there.x] = here;
+			_discovered[there.y][there.x] = true;
+			_maze.lock()->SetBlockType(there, Block::BlockType::FOOTPRINT);
+		}
+	}
+
+	Vector check = end;
+	_path.push_back(end);
+	while (true)
+	{
+		if (check == start)
+			break;
+
+		check = _parent[check.y][check.x];
+		_path.push_back(check);
+	}
+
+	std::reverse(_path.begin(), _path.end());
+}*/
+
+void Player::Dijkstra()
+{
+	Vector frontPos[4] =
+	{
+		Vector(0,-1), // UP
+		Vector(1,0),  // RIGHT
+		Vector(0,1),  // DOWN
+		Vector(-1,0)  // LEFT
+	};
+
+	_parent.resize(MAX_Y, vector<Vector>(MAX_X, Vector(-1, -1)));
+	vector<vector<int>> best(MAX_Y, vector<int>(MAX_X, false));
+
+	priority_queue<pair<int, Vector>, vector<pair<int, Vector>>> pq;
+	Vector start = _maze.lock()->StartPos();
+	Vector end = _maze.lock()->EndPos();
+	pq.push({ 0, start });
+	_parent[start.y][start.x] = start;
+	best[start.y][start.x] = 0;
+	
+
+	while (true)
+	{
+		if (pq.empty())
+			break;
+
+		auto top = pq.top();
+		int currentDist = top.first;
+		Vector here = top.second;
+		pq.pop();
+
+		if (here == end)
+			break;
+
+		for (int i = 0; i < 4; ++i)
+		{
+			Vector there = here + frontPos[i];
+			if (!Cango(there))
+				continue;
+
+			int cost = 1;
+			int newDist = currentDist + cost;
+
+			if (newDist < best[there.y][there.x])
+			{
+				best[there.y][there.x] = newDist;
+				_parent[there.y][there.x] = here;
+				pq.push({ newDist, there });
+
+				_maze.lock()->SetBlockType(there, Block::BlockType::FOOTPRINT);
+			}
+		}
+	}
+
+	// 경로 재구성
+	Vector check = end;
+	_path.clear();
+	_path.push_back(end);
+	while (check != start)
+	{
+		check = _parent[check.y][check.x];
+		_path.push_back(check);
+	}
+	std::reverse(_path.begin(), _path.end());
+}
 
 bool Player::Cango(Vector pos)
 {
