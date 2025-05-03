@@ -8,7 +8,8 @@ public:
 		ABLE,
 		DISABLE,
 		PLAYER,
-		FOOTPRINT
+		FOOTPRINT,
+		CANGO
 	};
 
 	Block();

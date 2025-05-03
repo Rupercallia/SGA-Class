@@ -1,5 +1,6 @@
 #include "framework.h"
 #include "Player.h"
+
 #include "Objects/Maze/Block.h"
 #include "Objects/Maze/Maze.h"
 
@@ -7,7 +8,7 @@ Player::Player(shared_ptr<Maze> maze)
 : _maze(maze)
 {
 	_maze.lock()->SetBlockType(_pos, Block::BlockType::PLAYER);
-	BFS();
+	AStar();
 }
 
 Player::~Player()
@@ -34,7 +35,7 @@ void Player::Update()
 	}
 }
 
-/*void Player::FindPath_RightHand()
+void Player::FindPath_RightHand()
 {
 	auto maze = _maze.lock();
 
@@ -110,18 +111,10 @@ void Player::Update()
 	}
 
 	std::reverse(_path.begin(), _path.end());
-}*/
+}
 
-/*void Player::BFS()
+void Player::BFS()
 {
-	Vector frontPos[4] =
-	{
-		Vector(0,-1), // UP
-		Vector(1,0), // RIGHT
-		Vector(0,1), // DOWN
-		Vector(-1,0) // LEFT
-	};
-
 	_parent.resize(MAX_Y, vector<Vector>(MAX_X, Vector(-1, -1)));
 	_discovered.resize(MAX_Y, vector<bool>(MAX_X, false));
 
@@ -168,71 +161,76 @@ void Player::Update()
 	}
 
 	std::reverse(_path.begin(), _path.end());
-}*/
+}
 
-void Player::Dijkstra()
+void Player::AStar()
 {
-	Vector frontPos[4] =
-	{
-		Vector(0,-1), // UP
-		Vector(1,0),  // RIGHT
-		Vector(0,1),  // DOWN
-		Vector(-1,0)  // LEFT
-	};
-
-	_parent.resize(MAX_Y, vector<Vector>(MAX_X, Vector(-1, -1)));
-	vector<vector<int>> best(MAX_Y, vector<int>(MAX_X, false));
-
-	priority_queue<pair<int, Vector>, vector<pair<int, Vector>>> pq;
 	Vector start = _maze.lock()->StartPos();
 	Vector end = _maze.lock()->EndPos();
-	pq.push({ 0, start });
+
+	_parent = vector<vector<Vector>>(MAX_Y, vector<Vector>(MAX_X, Vector(-1, -1)));
 	_parent[start.y][start.x] = start;
-	best[start.y][start.x] = 0;
-	
+	vector<vector<int>> best = vector<vector<int>>(MAX_Y, vector<int>(MAX_X, INT_MAX));
+	priority_queue<Vertex, vector<Vertex>, greater<Vertex>> pq;
+
+	Vertex startV(start, 0, Vector::Manhattan(start, end) * 10);
+	best[start.y][start.x] = startV.f;
+	pq.push(startV);
 
 	while (true)
 	{
 		if (pq.empty())
 			break;
 
-		auto top = pq.top();
-		int currentDist = top.first;
-		Vector here = top.second;
+		Vertex hereV = pq.top();
+		Vector here = hereV.pos;
 		pq.pop();
 
 		if (here == end)
 			break;
 
-		for (int i = 0; i < 4; ++i)
+		// pq에 이미 예약이 걸려있었는데, 더 좋은게 먼저 발견된 경우
+		if (hereV.f > best[here.y][here.x])
+			continue;
+
+		for (int i = 0; i < 8; i++)
 		{
 			Vector there = here + frontPos[i];
-			if (!Cango(there))
+
+			if (Cango(there) == false)
 				continue;
 
-			int cost = 1;
-			int newDist = currentDist + cost;
+			int newG = hereV.g;
+			if (i < 4)
+				newG += 10;
+			else
+				newG += 14;
 
-			if (newDist < best[there.y][there.x])
-			{
-				best[there.y][there.x] = newDist;
-				_parent[there.y][there.x] = here;
-				pq.push({ newDist, there });
+			int newH = (end - there).Length() * 10;
+			int newF = newG + newH;
 
-				_maze.lock()->SetBlockType(there, Block::BlockType::FOOTPRINT);
-			}
+			if (newF > best[there.y][there.x])
+				continue;
+
+			Vertex thereV(there, newG, newH);
+			pq.push(thereV);
+			_parent[there.y][there.x] = here;
+			best[there.y][there.x] = thereV.f;
+			_maze.lock()->SetBlockType(there, Block::BlockType::FOOTPRINT);
 		}
 	}
 
-	// 경로 재구성
 	Vector check = end;
-	_path.clear();
 	_path.push_back(end);
-	while (check != start)
+	while (true)
 	{
+		if (check == start)
+			break;
+
 		check = _parent[check.y][check.x];
 		_path.push_back(check);
 	}
+
 	std::reverse(_path.begin(), _path.end());
 }
 
